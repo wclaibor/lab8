@@ -1,0 +1,65 @@
+<html>
+<head>
+    <title>City Finder</title>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+</head>
+<body>
+    <form>
+        Enter A Utah City: <input type="text" id="cityfield" value=""><br>
+        Suggestion: <span id="texthint">Empty</span>
+        <input id="button" type="submit" value="Submit">
+    </form>
+    <p>City</p>
+    <textarea id="dispcity">No City</textarea>
+    <p>Current Weather</p>
+    <div id="weather">No weather</div>
+
+    </form>
+    <script>
+        $("#button").click(function (e) {
+            $("#dispcity").text($("#cityfield").val());
+            e.preventDefault();
+            var myurl = "https://api.wunderground.com/api/599fea4f77238772/geolookup/conditions/q/UT/";
+            var city = $("#cityfield").val();
+            var noSpace = city.replace(' ', '+');
+            myurl += $("#cityfield").val();
+            myurl += ".json";
+            console.log(myurl);
+            $.ajax({
+                url: myurl,
+                dataType: "jsonp",
+                success: function (parsed_json) {
+                    console.log(parsed_json);
+                    var location = parsed_json['location']['city'];
+                    var temp_string = parsed_json['current_observation']['temperature_string'];
+                    var current_weather = parsed_json['current_observation']['weather'];
+                    var everything = "<ul>";
+                    everything += "<li>Location: " + location + " </li>";
+                    everything += "<li>Temperature: " + temp_string + "</li>";
+                    everything += "<li>Weather: " + current_weather + "</li>";
+                    everything += "</ul";
+                    $("#weather").html(everything);
+                }
+            });
+        });
+        $("#cityfield").keyup(function () {
+            //alert("Handler for .keyup() called.");
+            var url = "/getcity.cgi?q=";
+            url += $("#cityfield").val();
+            console.log("URL: " + url);
+            $.getJSON(url, function (data) {
+                var everything = "<ul>";
+                $.each(data, function (i, item) {
+                    everything += "<li> " + data[i].city + "</li>";
+                });
+                everything += "</ul>";
+                $("#texthint").html(everything);
+                console.log(data);
+                console.log("Got " + data[0]);
+                //console.log("Got " + data[0].city);
+            });
+        });
+    </script>   
+</body>
+</html>
